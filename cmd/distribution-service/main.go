@@ -15,7 +15,8 @@ func main() {
 
 	pmClient := service.NewPlanetmintClient(config.PlanetmintRPCHost)
 	eClient := service.NewElementsClient()
-	service := service.NewDistributionService(pmClient, eClient)
+	r2pClient := service.NewR2PClient(config.R2PHost)
+	service := service.NewDistributionService(pmClient, eClient, r2pClient)
 
 	if err = service.Run(); err != nil {
 		log.Panicf("error occurred while spinning up service: %v", err)

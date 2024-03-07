@@ -1,18 +1,21 @@
 package service
 
 type DistributionService struct {
-	pmClient IPlanetmintClient
-	eClient  IElementsClient
+	pmClient  IPlanetmintClient
+	eClient   IElementsClient
+	r2pClient IR2PClient
 }
 
-func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient) *DistributionService {
+func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient IR2PClient) *DistributionService {
 	return &DistributionService{
-		pmClient: pmClient,
-		eClient:  eClient,
+		pmClient:  pmClient,
+		eClient:   eClient,
+		r2pClient: r2pClient,
 	}
 }
 
 // Start service/ticker to periodically check for DAO rewards to distribute to validators
+// TODO: Make configurable by cron job like syntax
 func (ds *DistributionService) Run() (err error) {
 	return
 }
