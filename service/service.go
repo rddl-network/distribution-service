@@ -1,5 +1,16 @@
 package service
 
+import (
+	"fmt"
+	"sync"
+
+	"github.com/robfig/cron/v3"
+)
+
+var (
+	wg sync.WaitGroup
+)
+
 type DistributionService struct {
 	pmClient  IPlanetmintClient
 	eClient   IElementsClient
@@ -14,14 +25,29 @@ func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient,
 	}
 }
 
-// Start service/ticker to periodically check for DAO rewards to distribute to validators
-// TODO: Make configurable by cron job like syntax
-func (ds *DistributionService) Run() (err error) {
+// Run starts cronjob like thread to periodically check for DAO rewards to distribute to validators
+func (ds *DistributionService) Run(cronExp string) (err error) {
+	wg.Add(1)
+
+	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.DowOptional | cron.Descriptor)
+
+	c := cron.New(cron.WithParser(parser), cron.WithChain())
+	_, err = c.AddFunc(cronExp, ds.Distribute)
+	if err != nil {
+		return
+	}
+	c.Start()
+
+	defer wg.Done()
+	wg.Wait()
+
 	return
 }
 
 // Distributes 10% of received funds to all validators
-func (ds *DistributionService) Distribute() {}
+func (ds *DistributionService) Distribute() {
+	fmt.Println("CRON THE SECRET OF THE TASK")
+}
 
 // Checks for Received RDDL over a given timeperiod
 func (ds *DistributionService) CheckReceivedBalance() {}

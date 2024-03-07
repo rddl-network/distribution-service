@@ -21,7 +21,9 @@ func LoadConfig(path string) (cfg *Config, err error) {
 	if err == nil {
 		cfg = GetConfig()
 		cfg.Wallet = v.GetString("wallet")
-		cfg.PlanetmintRPCHost = viper.GetString("planetmint-rpc-host")
+		cfg.PlanetmintRPCHost = v.GetString("planetmint-rpc-host")
+		cfg.R2PHost = v.GetString("r2p-host")
+		cfg.Cron = v.GetString("cron")
 		return
 	}
 	log.Println("no config file found.")
