@@ -24,6 +24,13 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.PlanetmintRPCHost = v.GetString("planetmint-rpc-host")
 		cfg.R2PHost = v.GetString("r2p-host")
 		cfg.Cron = v.GetString("cron")
+		cfg.RPCHost = v.GetString("rpc-host")
+		cfg.RPCUser = v.GetString("rpc-user")
+		cfg.RPCPass = v.GetString("rpc-pass")
+		cfg.ShamireHost = v.GetString("shamir-host")
+		cfg.Confirmations = v.GetInt64("confirmations")
+		cfg.FundAddress = v.GetString("fund-address")
+		cfg.Asset = v.GetString("asset")
 		return
 	}
 	log.Println("no config file found.")
