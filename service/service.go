@@ -1,10 +1,13 @@
 package service
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"sync"
 	"time"
 
+	"github.com/rddl-network/distribution-service/config"
 	"github.com/robfig/cron/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -60,17 +63,23 @@ func (ds *DistributionService) Distribute() {
 	received := ds.CheckReceivedBalance(timestamp)
 
 	// GetActiveValidatorAddresses
-	addresses, err := ds.GetActiveValidatorAddresses()
+	plmntAddresses, err := ds.GetActiveValidatorAddresses()
 	if err != nil {
 		log.Println("Error while fetching validator set: " + err.Error())
 		return
 	}
 
 	// CalculateShares
-	share, _ := ds.CalculateShares(received, uint64(len(addresses)))
+	share, _ := ds.CalculateShares(received, uint64(len(plmntAddresses)))
+
+	liquidAddresses, err := ds.GetReceiveAddresses(plmntAddresses)
+	if err != nil {
+		log.Println("Error while fetching receive addresses: " + err.Error())
+		return
+	}
 
 	// SendToAddresses
-	err = ds.SendToAddresses(share, addresses)
+	err = ds.sendToAddresses(share, liquidAddresses)
 	if err != nil {
 		log.Println("Error while sending to validators: " + err.Error())
 		return
@@ -84,6 +93,18 @@ func (ds *DistributionService) Distribute() {
 
 // Checks for Received RDDL since a given timestamp
 func (ds *DistributionService) CheckReceivedBalance(timestamp int64) (received uint64) {
+	return
+}
+
+// GetReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
+func (ds *DistributionService) GetReceiveAddresses(addresses []string) (receiveAddresses []string, err error) {
+	for _, address := range addresses {
+		receiveAddress, err := ds.r2pClient.GetReceiveAddress(address)
+		if err != nil {
+			return nil, err
+		}
+		receiveAddresses = append(receiveAddresses, receiveAddress)
+	}
 	return
 }
 
@@ -116,6 +137,32 @@ func (ds *DistributionService) CalculateShares(total uint64, numValidators uint6
 	return
 }
 
-func (ds *DistributionService) SendToAddresses(share uint64, addresses []string) (err error) {
+func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string) (err error) {
+	for _, address := range addresses {
+		err = ds.issueShamirTransaction(amount, address)
+		if err != nil {
+			return err
+		}
+	}
+
+	return
+}
+
+func (ds *DistributionService) issueShamirTransaction(amount uint64, address string) (err error) {
+	cfg := config.GetConfig()
+	url := fmt.Sprintf("%s/%s/%d", cfg.ShamireHost, address, amount)
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
 	return
 }

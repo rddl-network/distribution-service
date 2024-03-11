@@ -13,6 +13,7 @@ cron="{{ .Cron }}"
 rpc-host="{{ .RPCHost }}"
 rpc-user="{{ .RPCUser }}"
 rpc-pass="{{ .RPCPass }}"
+shamir-host="{{ .ShamirHost }}"
 `
 
 type Config struct {
@@ -23,6 +24,7 @@ type Config struct {
 	RPCHost           string `mapstructure:"rpc-host"`
 	RPCUser           string `mapstructure:"rpc-user"`
 	RPCPass           string `mapstructure:"rpc-pass"`
+	ShamireHost       string `mapstructure:"shamir-host"`
 }
 
 var (
@@ -40,6 +42,7 @@ func DefaultConfig() *Config {
 		RPCHost:           "planetmint-go-testnet-3.rddl.io:18884",
 		RPCUser:           "user",
 		RPCPass:           "password",
+		ShamireHost:       "127.0.0.1:9091",
 	}
 }
 
