@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
 	"github.com/robfig/cron/v3"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -54,13 +56,16 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 
 // Distributes 10% of received funds to all validators
 func (ds *DistributionService) Distribute() {
-	timestamp, err := ds.getLastOccurence()
+	occurence, err := ds.getLastOccurence()
 	if err != nil {
 		log.Println("Error while reading last occurence: " + err.Error())
 		return
 	}
 
-	received := ds.CheckReceivedBalance(timestamp)
+	received, err := ds.CheckReceivedBalance()
+	if err != nil {
+		log.Println("Error while checking received assets: " + err.Error())
+	}
 
 	// GetActiveValidatorAddresses
 	plmntAddresses, err := ds.GetActiveValidatorAddresses()
@@ -70,7 +75,7 @@ func (ds *DistributionService) Distribute() {
 	}
 
 	// CalculateShares
-	share, _ := ds.CalculateShares(received, uint64(len(plmntAddresses)))
+	share, _ := ds.CalculateShares(received-occurence.TotalAmount, uint64(len(plmntAddresses)))
 
 	liquidAddresses, err := ds.GetReceiveAddresses(plmntAddresses)
 	if err != nil {
@@ -85,14 +90,26 @@ func (ds *DistributionService) Distribute() {
 		return
 	}
 
-	err = ds.storeLastOccurence(time.Now().Unix())
+	err = ds.storeLastOccurence(time.Now().Unix(), received)
 	if err != nil {
 		log.Println("Error while storing last occurence: " + err.Error())
 	}
 }
 
-// Checks for Received RDDL since a given timestamp
-func (ds *DistributionService) CheckReceivedBalance(timestamp int64) (received uint64) {
+// Checks for Received RDDL since the last distribution occurence
+func (ds *DistributionService) CheckReceivedBalance() (received uint64, err error) {
+	cfg := config.GetConfig()
+	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
+		[]string{strconv.Itoa(int(cfg.Confirmations)), "false", "true", cfg.FundAddress, cfg.Asset},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, txDetail := range txDetails {
+		received += util.RDDLToken2Uint(txDetail.Amount)
+	}
+
 	return
 }
 
