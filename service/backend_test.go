@@ -26,26 +26,26 @@ func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.D
 	return
 }
 
-func createNOccurences(app *service.DistributionService, n int) []service.Occurence {
-	items := make([]service.Occurence, n)
+func createNOccurrences(app *service.DistributionService, n int) []service.Occurrence {
+	items := make([]service.Occurrence, n)
 	for i := range items {
 		items[i].Timestamp = int64(i)
 		items[i].Amount = uint64(i * 1000)
-		app.StoreOccurence(items[i].Timestamp, items[i].Amount)
+		_ = app.StoreOccurrence(items[i].Timestamp, items[i].Amount)
 	}
 	return items
 }
 
-func TestOccurence(t *testing.T) {
+func TestOccurrence(t *testing.T) {
 	app, db := setupService(t)
 	defer db.Close()
 
-	items := createNOccurences(app, 10)
-	occurence, err := app.GetOccurence(items[5].Timestamp)
+	items := createNOccurrences(app, 10)
+	occurrence, err := app.GetOccurrence(items[5].Timestamp)
 	assert.NoError(t, err)
-	assert.Equal(t, items[5].Amount, occurence.Amount)
+	assert.Equal(t, items[5].Amount, occurrence.Amount)
 
-	lastOccurence, err := app.GetLastOccurence()
+	lastOccurrence, err := app.GetLastOccurrence()
 	assert.NoError(t, err)
-	assert.Equal(t, items[9].Amount, lastOccurence.Amount)
+	assert.Equal(t, items[9].Amount, lastOccurrence.Amount)
 }

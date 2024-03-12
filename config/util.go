@@ -59,5 +59,4 @@ func LoadConfig(path string) (cfg *Config, err error) {
 	log.Println("default config file created. please adapt it and restart the application. exiting...")
 	os.Exit(0)
 	return
-
 }

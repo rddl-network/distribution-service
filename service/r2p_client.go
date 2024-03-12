@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,7 +28,13 @@ func NewR2PClient(host string) *R2PClient {
 func (r2p *R2PClient) GetReceiveAddress(plmntAddress string) (receiveAddress string, err error) {
 	url := r2p.host + plmntAddress
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return "", nil
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}

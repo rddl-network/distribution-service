@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -87,9 +88,9 @@ func (ds *DistributionService) Distribute() {
 }
 
 func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, err error) {
-	occurence, err := ds.GetLastOccurence()
+	occurrence, err := ds.GetLastOccurrence()
 	if err != nil {
-		log.Println("Error while reading last occurence: " + err.Error())
+		log.Println("Error while reading last occurrence: " + err.Error())
 		return
 	}
 
@@ -99,13 +100,13 @@ func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, 
 		return
 	}
 
-	err = ds.StoreOccurence(time.Now().Unix(), received)
+	err = ds.StoreOccurrence(time.Now().Unix(), received)
 	if err != nil {
-		log.Println("Error while storing occurence: " + err.Error())
+		log.Println("Error while storing occurrence: " + err.Error())
 		return
 	}
 
-	return received - occurence.Amount/100*10, nil
+	return received - occurrence.Amount/100*10, nil
 }
 
 // Checks for received asset on a given address
@@ -181,7 +182,7 @@ func (ds *DistributionService) issueShamirTransaction(amount uint64, address str
 	cfg := config.GetConfig()
 	url := fmt.Sprintf("%s/%s/%d", cfg.ShamireHost, address, amount)
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
 	if err != nil {
 		return err
 	}
