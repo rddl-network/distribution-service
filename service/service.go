@@ -56,15 +56,10 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 
 // Distributes 10% of received funds to all validators
 func (ds *DistributionService) Distribute() {
-	occurence, err := ds.getLastOccurence()
+	distributionAmt, err := ds.GetDistributionAmount()
 	if err != nil {
-		log.Println("Error while reading last occurence: " + err.Error())
+		log.Println("Error while calculating distribution amount: " + err.Error())
 		return
-	}
-
-	received, err := ds.CheckReceivedBalance()
-	if err != nil {
-		log.Println("Error while checking received assets: " + err.Error())
 	}
 
 	// GetActiveValidatorAddresses
@@ -75,7 +70,7 @@ func (ds *DistributionService) Distribute() {
 	}
 
 	// CalculateShares
-	share, _ := ds.CalculateShares(received-occurence.TotalAmount, uint64(len(plmntAddresses)))
+	share, _ := ds.CalculateShares(distributionAmt, uint64(len(plmntAddresses)))
 
 	liquidAddresses, err := ds.GetReceiveAddresses(plmntAddresses)
 	if err != nil {
@@ -89,14 +84,31 @@ func (ds *DistributionService) Distribute() {
 		log.Println("Error while sending to validators: " + err.Error())
 		return
 	}
-
-	err = ds.storeLastOccurence(time.Now().Unix(), received)
-	if err != nil {
-		log.Println("Error while storing last occurence: " + err.Error())
-	}
 }
 
-// Checks for Received RDDL since the last distribution occurence
+func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, err error) {
+	occurence, err := ds.GetLastOccurence()
+	if err != nil {
+		log.Println("Error while reading last occurence: " + err.Error())
+		return
+	}
+
+	received, err := ds.CheckReceivedBalance()
+	if err != nil {
+		log.Println("Error while checking received assets: " + err.Error())
+		return
+	}
+
+	err = ds.StoreOccurence(time.Now().Unix(), received)
+	if err != nil {
+		log.Println("Error while storing occurence: " + err.Error())
+		return
+	}
+
+	return received - occurence.Amount/100*10, nil
+}
+
+// Checks for received asset on a given address
 func (ds *DistributionService) CheckReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
