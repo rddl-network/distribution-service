@@ -65,7 +65,9 @@ func (ds *DistributionService) GetLastOccurrence() (occurrence *Occurrence, err 
 
 	iter.Last()
 
-	bytes := iter.Value()
-	err = json.Unmarshal(bytes, &occurrence)
+	if iter.Valid() {
+		bytes := iter.Value()
+		err = json.Unmarshal(bytes, &occurrence)
+	}
 	return
 }

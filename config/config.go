@@ -28,7 +28,7 @@ type Config struct {
 	RPCUser           string `mapstructure:"rpc-user"`
 	RPCPass           string `mapstructure:"rpc-pass"`
 	ShamireHost       string `mapstructure:"shamir-host"`
-	Confirmations     int64  `mapstructure:"confirmations"`
+	Confirmations     int    `mapstructure:"confirmations"`
 	FundAddress       string `mapstructure:"fund-address"`
 	Asset             string `mapstructure:"asset"`
 }

@@ -3,28 +3,9 @@ package service_test
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/rddl-network/distribution-service/service"
-	"github.com/rddl-network/distribution-service/testutil"
 	"github.com/stretchr/testify/assert"
-	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/syndtr/goleveldb/leveldb/storage"
 )
-
-func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.DB) {
-	db, err := leveldb.Open(storage.NewMemStorage(), nil)
-	if err != nil {
-		t.Fatal("Error opening in-memory LevelDB: ", err.Error())
-	}
-
-	ctrl := gomock.NewController(t)
-	eClient := testutil.NewMockIElementsClient(ctrl)
-	pmClient := testutil.NewMockIPlanetmintClient(ctrl)
-	r2pClient := testutil.NewMockIR2PClient(ctrl)
-
-	app = service.NewDistributionService(pmClient, eClient, r2pClient, db)
-	return
-}
 
 func createNOccurrences(app *service.DistributionService, n int) []service.Occurrence {
 	items := make([]service.Occurrence, n)
@@ -37,7 +18,7 @@ func createNOccurrences(app *service.DistributionService, n int) []service.Occur
 }
 
 func TestOccurrence(t *testing.T) {
-	app, db := setupService(t)
+	app, db, _ := setupService(t)
 	defer db.Close()
 
 	items := createNOccurrences(app, 10)

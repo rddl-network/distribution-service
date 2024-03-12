@@ -1,10 +1,7 @@
 package service
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"sync"
 	"time"
@@ -20,19 +17,21 @@ var (
 )
 
 type DistributionService struct {
-	pmClient  IPlanetmintClient
-	eClient   IElementsClient
-	r2pClient IR2PClient
-	db        *leveldb.DB
-	dbMutex   sync.Mutex
+	pmClient     IPlanetmintClient
+	eClient      IElementsClient
+	r2pClient    IR2PClient
+	shamirClient IShamirClient
+	db           *leveldb.DB
+	dbMutex      sync.Mutex
 }
 
-func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient IR2PClient, db *leveldb.DB) *DistributionService {
+func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient IR2PClient, shamirClient IShamirClient, db *leveldb.DB) *DistributionService {
 	return &DistributionService{
-		pmClient:  pmClient,
-		eClient:   eClient,
-		r2pClient: r2pClient,
-		db:        db,
+		pmClient:     pmClient,
+		eClient:      eClient,
+		r2pClient:    r2pClient,
+		shamirClient: shamirClient,
+		db:           db,
 	}
 }
 
@@ -88,21 +87,18 @@ func (ds *DistributionService) Distribute() {
 }
 
 func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, err error) {
-	occurrence, err := ds.GetLastOccurrence()
+	received, err := ds.CheckReceivedBalance()
 	if err != nil {
-		log.Println("Error while reading last occurrence: " + err.Error())
 		return
 	}
 
-	received, err := ds.CheckReceivedBalance()
-	if err != nil {
-		log.Println("Error while checking received assets: " + err.Error())
-		return
+	occurrence, err := ds.GetLastOccurrence()
+	if err != nil || occurrence == nil {
+		return received / 100 * 10, err
 	}
 
 	err = ds.StoreOccurrence(time.Now().Unix(), received)
 	if err != nil {
-		log.Println("Error while storing occurrence: " + err.Error())
 		return
 	}
 
@@ -113,7 +109,7 @@ func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, 
 func (ds *DistributionService) CheckReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
-		[]string{strconv.Itoa(int(cfg.Confirmations)), "false", "true", cfg.FundAddress, cfg.Asset},
+		[]string{strconv.Itoa(cfg.Confirmations), "false", "true", cfg.FundAddress, cfg.Asset},
 	)
 	if err != nil {
 		return 0, err
@@ -142,13 +138,13 @@ func (ds *DistributionService) GetReceiveAddresses(addresses []string) (receiveA
 func (ds *DistributionService) GetActiveValidatorAddresses() (addresses []string, err error) {
 	valAddresses, err := ds.pmClient.GetValidatorAddresses()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for _, address := range valAddresses {
 		delegationAddresses, err := ds.pmClient.GetValidatorDelegationAddresses(address)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		addresses = append(addresses, delegationAddresses...)
 	}
@@ -169,30 +165,11 @@ func (ds *DistributionService) CalculateShares(total uint64, numValidators uint6
 
 func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string) (err error) {
 	for _, address := range addresses {
-		err = ds.issueShamirTransaction(amount, address)
+		err = ds.shamirClient.IssueShamirTransaction(amount, address)
 		if err != nil {
 			return err
 		}
 	}
-
-	return
-}
-
-func (ds *DistributionService) issueShamirTransaction(amount uint64, address string) (err error) {
-	cfg := config.GetConfig()
-	url := fmt.Sprintf("%s/%s/%d", cfg.ShamireHost, address, amount)
-
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
-	if err != nil {
-		return err
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
 
 	return
 }
