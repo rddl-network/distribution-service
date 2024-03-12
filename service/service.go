@@ -56,23 +56,23 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 
 // Distributes 10% of received funds to all validators
 func (ds *DistributionService) Distribute() {
-	distributionAmt, err := ds.GetDistributionAmount()
+	distributionAmt, err := ds.getDistributionAmount()
 	if err != nil {
 		log.Println("Error while calculating distribution amount: " + err.Error())
 		return
 	}
 
 	// GetActiveValidatorAddresses
-	plmntAddresses, err := ds.GetActiveValidatorAddresses()
+	plmntAddresses, err := ds.getActiveValidatorAddresses()
 	if err != nil {
 		log.Println("Error while fetching validator set: " + err.Error())
 		return
 	}
 
 	// CalculateShares
-	share, _ := ds.CalculateShares(distributionAmt, uint64(len(plmntAddresses)))
+	share, _ := ds.calculateShares(distributionAmt, uint64(len(plmntAddresses)))
 
-	liquidAddresses, err := ds.GetReceiveAddresses(plmntAddresses)
+	liquidAddresses, err := ds.getReceiveAddresses(plmntAddresses)
 	if err != nil {
 		log.Println("Error while fetching receive addresses: " + err.Error())
 		return
@@ -86,7 +86,7 @@ func (ds *DistributionService) Distribute() {
 	}
 }
 
-func (ds *DistributionService) GetDistributionAmount() (distributionAmt uint64, err error) {
+func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, err error) {
 	received, err := ds.CheckReceivedBalance()
 	if err != nil {
 		return
@@ -122,8 +122,8 @@ func (ds *DistributionService) CheckReceivedBalance() (received uint64, err erro
 	return
 }
 
-// GetReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
-func (ds *DistributionService) GetReceiveAddresses(addresses []string) (receiveAddresses []string, err error) {
+// getReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
+func (ds *DistributionService) getReceiveAddresses(addresses []string) (receiveAddresses []string, err error) {
 	for _, address := range addresses {
 		receiveAddress, err := ds.r2pClient.GetReceiveAddress(address)
 		if err != nil {
@@ -135,7 +135,7 @@ func (ds *DistributionService) GetReceiveAddresses(addresses []string) (receiveA
 }
 
 // Gets all active validator addresses
-func (ds *DistributionService) GetActiveValidatorAddresses() (addresses []string, err error) {
+func (ds *DistributionService) getActiveValidatorAddresses() (addresses []string, err error) {
 	valAddresses, err := ds.pmClient.GetValidatorAddresses()
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (ds *DistributionService) GetActiveValidatorAddresses() (addresses []string
 }
 
 // Calculates share per given address
-func (ds *DistributionService) CalculateShares(total uint64, numValidators uint64) (share uint64, remainder uint64) {
+func (ds *DistributionService) calculateShares(total uint64, numValidators uint64) (share uint64, remainder uint64) {
 	if numValidators == 0 {
 		return 0, total
 	}
