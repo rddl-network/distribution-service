@@ -1,13 +1,15 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type IShamirClient interface {
-	IssueTransaction(amount uint64, address string) (err error)
+	IssueTransaction(amount string, address string) (err error)
 }
 
 type ShamirClient struct {
@@ -18,10 +20,25 @@ func NewShamirClient(host string) *ShamirClient {
 	return &ShamirClient{host: host}
 }
 
-func (sc *ShamirClient) IssueTransaction(amount uint64, address string) (err error) {
-	url := fmt.Sprintf("https://%s/%s/%d", sc.host, address, amount)
+type SendTokensRequest struct {
+	Recipient string `json:"recipient"`
+	Amount    string `json:"amount"`
+}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
+func (sc *ShamirClient) IssueTransaction(amount string, address string) (err error) {
+	url := fmt.Sprintf("https://%s/send", sc.host)
+
+	body := &SendTokensRequest{
+		Recipient: address,
+		Amount:    amount,
+	}
+
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return err
 	}

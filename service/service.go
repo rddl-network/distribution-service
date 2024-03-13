@@ -166,8 +166,10 @@ func (ds *DistributionService) calculateShares(total uint64, numValidators uint6
 }
 
 func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string) (err error) {
+	amtString := util.UintValueToRDDLTokenString(amount)
+
 	for _, address := range addresses {
-		err = ds.shamirClient.IssueTransaction(amount, address)
+		err = ds.shamirClient.IssueTransaction(amtString, address)
 		if err != nil {
 			return err
 		}

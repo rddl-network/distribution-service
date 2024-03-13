@@ -49,8 +49,8 @@ func TestService(t *testing.T) {
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(1).Return([]string{"val2"}, nil)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val1").Times(1).Return("liquid1", nil)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val2").Times(1).Return("liquid2", nil)
-	mocks.shamirClientMock.EXPECT().IssueTransaction(uint64(500000000), "liquid1").Times(1).Return(nil)
-	mocks.shamirClientMock.EXPECT().IssueTransaction(uint64(500000000), "liquid2").Times(1).Return(nil)
+	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid1").Times(1).Return(nil)
+	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid2").Times(1).Return(nil)
 
 	app.Distribute()
 }
