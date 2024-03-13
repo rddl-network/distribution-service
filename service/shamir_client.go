@@ -19,7 +19,7 @@ func NewShamirClient(host string) *ShamirClient {
 }
 
 func (sc *ShamirClient) IssueTransaction(amount uint64, address string) (err error) {
-	url := fmt.Sprintf("%s/%s/%d", sc.host, address, amount)
+	url := fmt.Sprintf("https://%s/%s/%d", sc.host, address, amount)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
 	if err != nil {
