@@ -29,20 +29,26 @@ sequenceDiagram
     end
 ```
 
+## Execution
+The service can be executed via the following go command without having it previously built:
+```
+go run cmd/rddl-claim-service/main.go
+```
+
 ## Configuration
 The service needs to be configured via the ```./app.toml``` file or environment variables. The defaults are
 ```
-asset = '7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9'
-confirmations = 10
-cron = '* * * * * *'
-fund-address = ''
-planetmint-rpc-host = '127.0.0.1:9090'
-r2p-host = 'planetmint-go-testnet-3.rddl.io'
-rpc-host = 'planetmint-go-testnet-3.rddl.io:18884'
-rpc-pass = 'password'
-rpc-user = 'user'
-shamir-host = '127.0.0.1:9091'
-wallet = 'dao'
+asset = '7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9' //  liquid asset
+confirmations = 10 // min number of confirmations on liquid
+cron = '* * * * * *' // cron expression for periodic exectution
+fund-address = '' // liquid address that receives funds to distribute
+planetmint-rpc-host = '127.0.0.1:9090' // plmnt rpc host
+r2p-host = 'planetmint-go-testnet-3.rddl.io' // r2p host
+rpc-host = 'planetmint-go-testnet-3.rddl.io:18884' // elements rpc host
+rpc-pass = 'password' // elements rpc password
+rpc-user = 'user' // elements rpc user
+shamir-host = '127.0.0.1:9091' // shamir coordinator
+wallet = 'dao' // liquid wallet
 ```
 
 ## Data storage
