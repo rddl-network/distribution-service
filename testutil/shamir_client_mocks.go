@@ -34,7 +34,7 @@ func (m *MockIShamirClient) EXPECT() *MockIShamirClientMockRecorder {
 }
 
 // IssueTransaction mocks base method.
-func (m *MockIShamirClient) IssueTransaction(amount uint64, address string) error {
+func (m *MockIShamirClient) IssueTransaction(amount, address string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IssueTransaction", amount, address)
 	ret0, _ := ret[0].(error)
