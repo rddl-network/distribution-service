@@ -62,21 +62,14 @@ func (ds *DistributionService) Distribute() {
 		return
 	}
 
-	// GetActiveValidatorAddresses
-	plmntAddresses, err := ds.getActiveValidatorAddresses()
+	liquidAddresses, err := ds.getBeneficiaries()
 	if err != nil {
-		log.Println("Error while fetching validator set: " + err.Error())
+		log.Println("Error while fetching beneficiary addresses: " + err.Error())
 		return
 	}
 
 	// CalculateShares
-	share, _ := ds.calculateShares(distributionAmt, uint64(len(plmntAddresses)))
-
-	liquidAddresses, err := ds.getReceiveAddresses(plmntAddresses)
-	if err != nil {
-		log.Println("Error while fetching receive addresses: " + err.Error())
-		return
-	}
+	share, _ := ds.calculateShares(distributionAmt, uint64(len(liquidAddresses)))
 
 	// SendToAddresses
 	err = ds.sendToAddresses(share, liquidAddresses)
@@ -87,7 +80,7 @@ func (ds *DistributionService) Distribute() {
 }
 
 func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, err error) {
-	received, err := ds.CheckReceivedBalance()
+	received, err := ds.checkReceivedBalance()
 	if err != nil {
 		return
 	}
@@ -106,7 +99,7 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 }
 
 // Checks for received asset on a given address
-func (ds *DistributionService) CheckReceivedBalance() (received uint64, err error) {
+func (ds *DistributionService) checkReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
 		[]string{strconv.Itoa(cfg.Confirmations), "false", "true", cfg.FundAddress, cfg.Asset},
@@ -120,6 +113,15 @@ func (ds *DistributionService) CheckReceivedBalance() (received uint64, err erro
 	}
 
 	return
+}
+
+func (ds *DistributionService) getBeneficiaries() (addresses []string, err error) {
+	plmntAddresses, err := ds.getActiveValidatorAddresses()
+	if err != nil {
+		return nil, err
+	}
+
+	return ds.getReceiveAddresses(plmntAddresses)
 }
 
 // getReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
@@ -165,7 +167,7 @@ func (ds *DistributionService) calculateShares(total uint64, numValidators uint6
 
 func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string) (err error) {
 	for _, address := range addresses {
-		err = ds.shamirClient.IssueShamirTransaction(amount, address)
+		err = ds.shamirClient.IssueTransaction(amount, address)
 		if err != nil {
 			return err
 		}

@@ -33,16 +33,16 @@ func (m *MockIShamirClient) EXPECT() *MockIShamirClientMockRecorder {
 	return m.recorder
 }
 
-// IssueShamirTransaction mocks base method.
-func (m *MockIShamirClient) IssueShamirTransaction(amount uint64, address string) error {
+// IssueTransaction mocks base method.
+func (m *MockIShamirClient) IssueTransaction(amount uint64, address string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IssueShamirTransaction", amount, address)
+	ret := m.ctrl.Call(m, "IssueTransaction", amount, address)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// IssueShamirTransaction indicates an expected call of IssueShamirTransaction.
-func (mr *MockIShamirClientMockRecorder) IssueShamirTransaction(amount, address interface{}) *gomock.Call {
+// IssueTransaction indicates an expected call of IssueTransaction.
+func (mr *MockIShamirClientMockRecorder) IssueTransaction(amount, address interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IssueShamirTransaction", reflect.TypeOf((*MockIShamirClient)(nil).IssueShamirTransaction), amount, address)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IssueTransaction", reflect.TypeOf((*MockIShamirClient)(nil).IssueTransaction), amount, address)
 }

@@ -28,7 +28,7 @@ func (pmc *PlanetmintClient) GetValidatorAddresses() (addresses []string, err er
 		return nil, err
 	}
 
-	validatorsRes, err := client.Validators(context.Background(), &stakingTypes.QueryValidatorsRequest{})
+	validatorsRes, err := client.Validators(context.Background(), &stakingTypes.QueryValidatorsRequest{Status: stakingTypes.BondStatusBonded})
 	if err != nil {
 		return nil, err
 	}
