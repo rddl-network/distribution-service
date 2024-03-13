@@ -27,7 +27,7 @@ type Config struct {
 	RPCHost           string `mapstructure:"rpc-host"`
 	RPCUser           string `mapstructure:"rpc-user"`
 	RPCPass           string `mapstructure:"rpc-pass"`
-	ShamireHost       string `mapstructure:"shamir-host"`
+	ShamirHost        string `mapstructure:"shamir-host"`
 	Confirmations     int    `mapstructure:"confirmations"`
 	FundAddress       string `mapstructure:"fund-address"`
 	Asset             string `mapstructure:"asset"`
@@ -48,7 +48,7 @@ func DefaultConfig() *Config {
 		RPCHost:           "planetmint-go-testnet-3.rddl.io:18884",
 		RPCUser:           "user",
 		RPCPass:           "password",
-		ShamireHost:       "127.0.0.1:9091",
+		ShamirHost:        "127.0.0.1:9091",
 		Confirmations:     10,
 		FundAddress:       "",
 		Asset:             "7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9",

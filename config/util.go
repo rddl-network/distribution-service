@@ -27,7 +27,7 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.RPCHost = v.GetString("rpc-host")
 		cfg.RPCUser = v.GetString("rpc-user")
 		cfg.RPCPass = v.GetString("rpc-pass")
-		cfg.ShamireHost = v.GetString("shamir-host")
+		cfg.ShamirHost = v.GetString("shamir-host")
 		cfg.Confirmations = v.GetInt("confirmations")
 		cfg.FundAddress = v.GetString("fund-address")
 		cfg.Asset = v.GetString("asset")
