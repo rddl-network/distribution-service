@@ -19,7 +19,7 @@ on:
       files:
         description: "Files"
         required: true
-        default: "rddl-claim-service"
+        default: "distribution-service"
 
 jobs:
   release:
