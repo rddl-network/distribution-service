@@ -101,8 +101,9 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 // Checks for received asset on a given address
 func (ds *DistributionService) checkReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
+	confirmationString := strconv.Itoa(cfg.Confirmations)
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
-		[]string{strconv.Itoa(cfg.Confirmations), "false", "true", cfg.FundAddress, cfg.Asset},
+		[]string{confirmationString, "false", "true", `"` + cfg.FundAddress + `"`, `"` + cfg.Asset + `"`},
 	)
 	if err != nil {
 		return 0, err
