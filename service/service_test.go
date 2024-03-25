@@ -8,6 +8,8 @@ import (
 	"github.com/rddl-network/distribution-service/testutil"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+
+	r2p "github.com/rddl-network/rddl-2-plmnt-service/service"
 )
 
 type Mocks struct {
@@ -47,8 +49,8 @@ func TestService(t *testing.T) {
 	mocks.pmClientMock.EXPECT().GetValidatorAddresses().Times(1).Return([]string{"valoper1", "valoper2"}, nil)
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper1").Times(1).Return([]string{"val1"}, nil)
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(1).Return([]string{"val2"}, nil)
-	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val1").Times(1).Return("liquid1", nil)
-	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val2").Times(1).Return("liquid2", nil)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val1").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid1"}, nil)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val2").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid2"}, nil)
 	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid1").Times(1).Return(nil)
 	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid2").Times(1).Return(nil)
 

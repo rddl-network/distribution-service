@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log"
 	"strconv"
 	"sync"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
+	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
 	"github.com/robfig/cron/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -19,13 +21,13 @@ var (
 type DistributionService struct {
 	pmClient     IPlanetmintClient
 	eClient      IElementsClient
-	r2pClient    IR2PClient
+	r2pClient    r2p.IR2PClient
 	shamirClient IShamirClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
 }
 
-func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient IR2PClient, shamirClient IShamirClient, db *leveldb.DB) *DistributionService {
+func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient IShamirClient, db *leveldb.DB) *DistributionService {
 	return &DistributionService{
 		pmClient:     pmClient,
 		eClient:      eClient,
@@ -128,11 +130,11 @@ func (ds *DistributionService) getBeneficiaries() (addresses []string, err error
 // getReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
 func (ds *DistributionService) getReceiveAddresses(addresses []string) (receiveAddresses []string, err error) {
 	for _, address := range addresses {
-		receiveAddress, err := ds.r2pClient.GetReceiveAddress(address)
+		receiveAddress, err := ds.r2pClient.GetReceiveAddress(context.Background(), address)
 		if err != nil {
 			return nil, err
 		}
-		receiveAddresses = append(receiveAddresses, receiveAddress)
+		receiveAddresses = append(receiveAddresses, receiveAddress.LiquidAddress)
 	}
 	return
 }

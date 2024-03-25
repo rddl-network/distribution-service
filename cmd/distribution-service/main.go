@@ -2,9 +2,11 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/rddl-network/distribution-service/config"
 	"github.com/rddl-network/distribution-service/service"
+	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -23,7 +25,7 @@ func main() {
 
 	pmClient := service.NewPlanetmintClient(config.PlanetmintRPCHost)
 	eClient := service.NewElementsClient()
-	r2pClient := service.NewR2PClient(config.R2PHost)
+	r2pClient := r2p.NewR2PClient(config.R2PHost, &http.Client{})
 	shamirClient := service.NewShamirClient(config.ShamirHost)
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
 
