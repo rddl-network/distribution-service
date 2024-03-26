@@ -10,6 +10,7 @@ import (
 	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
 	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
+	shamir "github.com/rddl-network/shamir-coordinator-service/client"
 	"github.com/robfig/cron/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -22,12 +23,12 @@ type DistributionService struct {
 	pmClient     IPlanetmintClient
 	eClient      IElementsClient
 	r2pClient    r2p.IR2PClient
-	shamirClient IShamirClient
+	shamirClient shamir.IShamirCoordinatorClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
 }
 
-func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient IShamirClient, db *leveldb.DB) *DistributionService {
+func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
 	return &DistributionService{
 		pmClient:     pmClient,
 		eClient:      eClient,
@@ -172,7 +173,7 @@ func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string
 	amtString := util.UintValueToRDDLTokenString(amount)
 
 	for _, address := range addresses {
-		err = ds.shamirClient.IssueTransaction(amtString, address)
+		_, err = ds.shamirClient.SendTokens(context.Background(), address, amtString)
 		if err != nil {
 			return err
 		}
