@@ -43,7 +43,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		Wallet:            "dao",
 		PlanetmintRPCHost: "127.0.0.1:9090",
-		R2PHost:           "testnet-r2p.rddl.io",
+		R2PHost:           "https://testnet-r2p.rddl.io",
 		Cron:              "* * * * * *",
 		RPCHost:           "localhost:18884",
 		RPCUser:           "user",
