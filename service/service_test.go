@@ -8,13 +8,16 @@ import (
 	"github.com/rddl-network/distribution-service/testutil"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+
+	r2p "github.com/rddl-network/rddl-2-plmnt-service/service"
+	shamir "github.com/rddl-network/shamir-coordinator-service/service"
 )
 
 type Mocks struct {
 	eClientMock      *testutil.MockIElementsClient
 	pmClientMock     *testutil.MockIPlanetmintClient
 	r2pClientMock    *testutil.MockIR2PClient
-	shamirClientMock *testutil.MockIShamirClient
+	shamirClientMock *testutil.MockIShamirCoordinatorClient
 }
 
 func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.DB, mocks Mocks) {
@@ -27,7 +30,7 @@ func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.D
 	eClientMock := testutil.NewMockIElementsClient(ctrl)
 	pmClientMock := testutil.NewMockIPlanetmintClient(ctrl)
 	r2pClientMock := testutil.NewMockIR2PClient(ctrl)
-	shamirClientMock := testutil.NewMockIShamirClient(ctrl)
+	shamirClientMock := testutil.NewMockIShamirCoordinatorClient(ctrl)
 
 	app = service.NewDistributionService(pmClientMock, eClientMock, r2pClientMock, shamirClientMock, db)
 
@@ -47,10 +50,10 @@ func TestService(t *testing.T) {
 	mocks.pmClientMock.EXPECT().GetValidatorAddresses().Times(1).Return([]string{"valoper1", "valoper2"}, nil)
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper1").Times(1).Return([]string{"val1"}, nil)
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(1).Return([]string{"val2"}, nil)
-	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val1").Times(1).Return("liquid1", nil)
-	mocks.r2pClientMock.EXPECT().GetReceiveAddress("val2").Times(1).Return("liquid2", nil)
-	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid1").Times(1).Return(nil)
-	mocks.shamirClientMock.EXPECT().IssueTransaction("5.00000000", "liquid2").Times(1).Return(nil)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val1").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid1"}, nil)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val2").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid2"}, nil)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000").Times(1).Return(shamir.SendTokensResponse{}, nil)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000").Times(1).Return(shamir.SendTokensResponse{}, nil)
 
 	app.Distribute()
 }

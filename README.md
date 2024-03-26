@@ -43,11 +43,11 @@ confirmations = 10 // min number of confirmations on liquid
 cron = '* * * * * *' // cron expression for periodic exectution
 fund-address = '' // liquid address that receives funds to distribute
 planetmint-rpc-host = 'localhost:9090' // plmnt rpc host
-r2p-host = 'testnet-r2p.rddl.io' // r2p host
+r2p-host = 'https://testnet-r2p.rddl.io' // r2p host
 rpc-host = 'localhost:18884' // elements rpc host
 rpc-pass = 'password' // elements rpc password
 rpc-user = 'user' // elements rpc user
-shamir-host = 'localhost:9091' // shamir coordinator
+shamir-host = 'http://localhost:9091' // shamir coordinator
 wallet = 'dao' // read only liquid wallet
 ```
 
