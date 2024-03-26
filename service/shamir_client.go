@@ -26,7 +26,7 @@ type SendTokensRequest struct {
 }
 
 func (sc *ShamirClient) IssueTransaction(amount string, address string) (err error) {
-	url := fmt.Sprintf("https://%s/send", sc.host)
+	url := fmt.Sprintf("%s/send", sc.host)
 
 	body := &SendTokensRequest{
 		Recipient: address,
