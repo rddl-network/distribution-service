@@ -51,5 +51,8 @@ shamir-host = 'http://localhost:9091' // shamir coordinator
 wallet = 'dao' // read only liquid wallet
 ```
 
+### Logging
+The logger defaults to "error" but can be set via environment variable to the these levels `LOG_LEVEL=debug|info|warn|error`
+
 ## Data storage
 This service stores every occurrence of a distribution in a LevelDB. It needs this to compare how much tokens have been received by the DAO wallet since the last occurrence.

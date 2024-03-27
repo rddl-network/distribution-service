@@ -4,6 +4,7 @@ go 1.21.5
 
 require (
 	github.com/cosmos/cosmos-sdk v0.47.5
+	github.com/go-kit/log v0.2.1
 	github.com/golang/mock v1.6.0
 	github.com/planetmint/planetmint-go v0.8.4
 	github.com/rddl-network/elements-rpc v1.0.0
@@ -67,7 +68,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
-	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

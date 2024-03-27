@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"log"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,6 +26,7 @@ type DistributionService struct {
 	shamirClient shamir.IShamirCoordinatorClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
+	logger       AppLogger
 }
 
 func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
@@ -35,6 +36,7 @@ func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient,
 		r2pClient:    r2pClient,
 		shamirClient: shamirClient,
 		db:           db,
+		logger:       getLogger(),
 	}
 }
 
@@ -61,13 +63,13 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 func (ds *DistributionService) Distribute() {
 	distributionAmt, err := ds.getDistributionAmount()
 	if err != nil {
-		log.Println("Error while calculating distribution amount: " + err.Error())
+		ds.logger.Error("msg", "Error while calculating distribution amount: "+err.Error())
 		return
 	}
 
 	liquidAddresses, err := ds.getBeneficiaries()
 	if err != nil {
-		log.Println("Error while fetching beneficiary addresses: " + err.Error())
+		ds.logger.Error("msg", "Error while fetching beneficiary addresses: "+err.Error())
 		return
 	}
 
@@ -75,9 +77,10 @@ func (ds *DistributionService) Distribute() {
 	share, _ := ds.calculateShares(distributionAmt, uint64(len(liquidAddresses)))
 
 	// SendToAddresses
+	ds.logger.Info("msg", "sending tokens", "addresses", strings.Join(liquidAddresses, ","), "amount", distributionAmt, "share", share)
 	err = ds.sendToAddresses(share, liquidAddresses)
 	if err != nil {
-		log.Println("Error while sending to validators: " + err.Error())
+		ds.logger.Error("msg", "Error while sending to validators: "+err.Error())
 		return
 	}
 }
@@ -88,14 +91,20 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 		return
 	}
 
+	ds.logger.Debug("msg", "Reading last occurrence")
 	occurrence, err := ds.GetLastOccurrence()
-	if err != nil || occurrence == nil {
-		return received / 100 * 10, err
+	if err != nil {
+		return
 	}
 
+	ds.logger.Debug("msg", "Storing current occurrence")
 	err = ds.StoreOccurrence(time.Now().Unix(), received)
 	if err != nil {
 		return
+	}
+
+	if occurrence == nil {
+		return received / 100 * 10, nil
 	}
 
 	return received - occurrence.Amount/100*10, nil
@@ -104,6 +113,8 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 // Checks for received asset on a given address
 func (ds *DistributionService) checkReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
+	ds.logger.Info("msg", "checking received balance", "address", cfg.FundAddress, " asset", cfg.Asset)
+
 	confirmationString := strconv.Itoa(cfg.Confirmations)
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
 		[]string{confirmationString, "false", "true", `"` + cfg.FundAddress + `"`, `"` + cfg.Asset + `"`},
@@ -125,6 +136,7 @@ func (ds *DistributionService) getBeneficiaries() (addresses []string, err error
 		return nil, err
 	}
 
+	ds.logger.Info("msg", "fetching liquid receive addresses", "planetmintAddresses", strings.Join(plmntAddresses, ","))
 	return ds.getReceiveAddresses(plmntAddresses)
 }
 
