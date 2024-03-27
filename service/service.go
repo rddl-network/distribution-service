@@ -93,14 +93,18 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 
 	ds.logger.Debug("msg", "Reading last occurrence")
 	occurrence, err := ds.GetLastOccurrence()
-	if err != nil || occurrence == nil {
-		return received / 100 * 10, err
+	if err != nil {
+		return
 	}
 
 	ds.logger.Debug("msg", "Storing current occurrence")
 	err = ds.StoreOccurrence(time.Now().Unix(), received)
 	if err != nil {
 		return
+	}
+
+	if occurrence == nil {
+		return received / 100 * 10, nil
 	}
 
 	return received - occurrence.Amount/100*10, nil
