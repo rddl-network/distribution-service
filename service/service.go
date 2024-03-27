@@ -2,14 +2,11 @@ package service
 
 import (
 	"context"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
 	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
@@ -29,7 +26,7 @@ type DistributionService struct {
 	shamirClient shamir.IShamirCoordinatorClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
-	logger       log.Logger
+	logger       AppLogger
 }
 
 func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
@@ -41,28 +38,6 @@ func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient,
 		db:           db,
 		logger:       getLogger(),
 	}
-}
-
-func getLogger() (logger log.Logger) {
-	logger = log.NewLogfmtLogger(os.Stderr)
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
-
-	// Read log level from environment variable
-	logLevelEnv := os.Getenv("LOG_LEVEL") // LOG_LEVEL should be set to "debug", "info", "warn", or "error"
-
-	// Set log level
-	switch logLevelEnv {
-	case "debug":
-		logger = level.NewFilter(logger, level.AllowDebug())
-	case "info":
-		logger = level.NewFilter(logger, level.AllowInfo())
-	case "warn":
-		logger = level.NewFilter(logger, level.AllowWarn())
-	default:
-		logger = level.NewFilter(logger, level.AllowError())
-	}
-
-	return
 }
 
 // Run starts cronjob like thread to periodically check for DAO rewards to distribute to validators
@@ -88,13 +63,13 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 func (ds *DistributionService) Distribute() {
 	distributionAmt, err := ds.getDistributionAmount()
 	if err != nil {
-		level.Error(ds.logger).Log("msg", "Error while calculating distribution amount: "+err.Error())
+		ds.logger.Error("msg", "Error while calculating distribution amount: "+err.Error())
 		return
 	}
 
 	liquidAddresses, err := ds.getBeneficiaries()
 	if err != nil {
-		level.Error(ds.logger).Log("msg", "Error while fetching beneficiary addresses: "+err.Error())
+		ds.logger.Error("msg", "Error while fetching beneficiary addresses: "+err.Error())
 		return
 	}
 
@@ -102,10 +77,10 @@ func (ds *DistributionService) Distribute() {
 	share, _ := ds.calculateShares(distributionAmt, uint64(len(liquidAddresses)))
 
 	// SendToAddresses
-	level.Info(ds.logger).Log("msg", "sending tokens", "addresses", strings.Join(liquidAddresses, ","), "amount", distributionAmt, "share", share)
+	ds.logger.Info("msg", "sending tokens", "addresses", strings.Join(liquidAddresses, ","), "amount", distributionAmt, "share", share)
 	err = ds.sendToAddresses(share, liquidAddresses)
 	if err != nil {
-		level.Error(ds.logger).Log("msg", "Error while sending to validators: "+err.Error())
+		ds.logger.Error("msg", "Error while sending to validators: "+err.Error())
 		return
 	}
 }
@@ -116,13 +91,13 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 		return
 	}
 
-	level.Debug(ds.logger).Log("msg", "Reading last occurence")
+	ds.logger.Debug("msg", "Reading last occurrence")
 	occurrence, err := ds.GetLastOccurrence()
 	if err != nil || occurrence == nil {
 		return received / 100 * 10, err
 	}
 
-	level.Debug(ds.logger).Log("msg", "Storing current occurrence")
+	ds.logger.Debug("msg", "Storing current occurrence")
 	err = ds.StoreOccurrence(time.Now().Unix(), received)
 	if err != nil {
 		return
@@ -134,7 +109,7 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 // Checks for received asset on a given address
 func (ds *DistributionService) checkReceivedBalance() (received uint64, err error) {
 	cfg := config.GetConfig()
-	level.Info(ds.logger).Log("msg", "checking received balance", "address", cfg.FundAddress, " asset", cfg.Asset)
+	ds.logger.Info("msg", "checking received balance", "address", cfg.FundAddress, " asset", cfg.Asset)
 
 	confirmationString := strconv.Itoa(cfg.Confirmations)
 	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
@@ -157,7 +132,7 @@ func (ds *DistributionService) getBeneficiaries() (addresses []string, err error
 		return nil, err
 	}
 
-	level.Info(ds.logger).Log("msg", "fetching liquid receive addresses", "planetmintAddresses", strings.Join(plmntAddresses, ","))
+	ds.logger.Info("msg", "fetching liquid receive addresses", "planetmintAddresses", strings.Join(plmntAddresses, ","))
 	return ds.getReceiveAddresses(plmntAddresses)
 }
 
