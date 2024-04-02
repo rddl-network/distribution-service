@@ -31,6 +31,7 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.Confirmations = v.GetInt("confirmations")
 		cfg.FundAddress = v.GetString("fund-address")
 		cfg.Asset = v.GetString("asset")
+		cfg.LogLevel = v.GetString("log-level")
 		return
 	}
 	log.Println("no config file found.")

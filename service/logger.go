@@ -3,6 +3,9 @@ package service
 import (
 	"fmt"
 	"os"
+	"slices"
+
+	stdLog "log"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -12,16 +15,18 @@ type AppLogger struct {
 	logger log.Logger
 }
 
-func getLogger() AppLogger {
+func getLogger(logLevel string) AppLogger {
 	var logger log.Logger
 	logger = log.NewLogfmtLogger(os.Stderr)
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 
-	// Read log level from environment variable
-	logLevelEnv := os.Getenv("LOG_LEVEL") // LOG_LEVEL should be set to "debug", "info", "warn", or "error"
+	// logLevel should be set to "debug", "info", "warn", or "error"
+	if !slices.Contains([]string{"debug", "info", "warn", "error"}, logLevel) {
+		stdLog.Panicln("logLevel should be set to debug, info, warn or error")
+	}
 
 	// Set log level
-	switch logLevelEnv {
+	switch logLevel {
 	case "debug":
 		logger = level.NewFilter(logger, level.AllowDebug())
 	case "info":
