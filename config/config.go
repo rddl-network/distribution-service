@@ -17,6 +17,7 @@ shamir-host="{{ .ShamirHost }}"
 confirmations={{ .Confirmations }}
 fund-address="{{ .FundAddress }}"
 asset="{{ .Asset }}"
+log-level="{{ .LogLevel }}"
 `
 
 type Config struct {
@@ -31,6 +32,7 @@ type Config struct {
 	Confirmations     int    `mapstructure:"confirmations"`
 	FundAddress       string `mapstructure:"fund-address"`
 	Asset             string `mapstructure:"asset"`
+	LogLevel          string `mapstructure:"log-level"`
 }
 
 var (
@@ -52,6 +54,7 @@ func DefaultConfig() *Config {
 		Confirmations:     10,
 		FundAddress:       "",
 		Asset:             "7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9",
+		LogLevel:          "error",
 	}
 }
 

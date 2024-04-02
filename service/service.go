@@ -30,13 +30,15 @@ type DistributionService struct {
 }
 
 func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
+	cfg := config.GetConfig()
+
 	return &DistributionService{
 		pmClient:     pmClient,
 		eClient:      eClient,
 		r2pClient:    r2pClient,
 		shamirClient: shamirClient,
 		db:           db,
-		logger:       getLogger(),
+		logger:       getLogger(cfg.LogLevel),
 	}
 }
 
