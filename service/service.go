@@ -109,7 +109,7 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 		return received / 100 * 10, nil
 	}
 
-	return received - occurrence.Amount/100*10, nil
+	return (received - occurrence.Amount) / 100 * 10, nil
 }
 
 // Checks for received asset on a given address
