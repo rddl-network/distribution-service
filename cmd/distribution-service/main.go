@@ -20,7 +20,6 @@ func main() {
 
 	db, err := leveldb.OpenFile("./data", nil)
 	if err != nil {
-		db.Close()
 		log.Fatal(err)
 	}
 	defer db.Close()
