@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
@@ -29,6 +30,14 @@ func main() {
 	r2pClient := r2p.NewR2PClient(config.R2PHost, &http.Client{})
 	shamirClient := shamir.NewShamirCoordinatorClient(config.ShamirHost, &http.Client{})
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
+
+	// If flag distribute=true run service.Distribute function once and exit
+	distribute := flag.Bool("distribute", false, "Run Distribute function once and exit")
+	flag.Parse()
+	if *distribute {
+		service.Distribute()
+		return
+	}
 
 	if err = service.Run(config.Cron); err != nil {
 		log.Panicf("error occurred while spinning up service: %v", err)
