@@ -6,6 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/rddl-network/distribution-service/service"
 	"github.com/rddl-network/distribution-service/testutil"
+	"github.com/stretchr/testify/assert"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 
@@ -56,4 +57,13 @@ func TestService(t *testing.T) {
 	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000").Times(1).Return(shamir.SendTokensResponse{}, nil)
 
 	app.Distribute()
+}
+
+// Using uint64 with at least 8 zeros appended indicating the shift from float string to uint representation
+func TestCalculateDistributionAmount(t *testing.T) {
+	amt := service.CalculateDistributionAmount(100000000, 1000000000)
+	assert.Equal(t, uint64(90000000), amt)
+
+	amt = service.CalculateDistributionAmount(0, 1000000000)
+	assert.Equal(t, uint64(100000000), amt)
 }
