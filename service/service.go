@@ -106,10 +106,10 @@ func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, 
 	}
 
 	if occurrence == nil {
-		return received / 100 * 10, nil
+		return CalculateDistributionAmount(0, received), nil
 	}
 
-	return (received - occurrence.Amount) / 100 * 10, nil
+	return CalculateDistributionAmount(occurrence.Amount, received), nil
 }
 
 // Checks for received asset on a given address
@@ -194,4 +194,12 @@ func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string
 	}
 
 	return
+}
+
+func CalculateDistributionAmount(prev uint64, curr uint64) (distributionAmt uint64) {
+	if prev == 0 {
+		return curr / 100 * 10
+	}
+
+	return (curr - prev) / 100 * 10
 }
