@@ -9,6 +9,7 @@ import (
 
 	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
+	log "github.com/rddl-network/go-logger"
 	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
 	shamir "github.com/rddl-network/shamir-coordinator-service/client"
 	"github.com/robfig/cron/v3"
@@ -26,7 +27,7 @@ type DistributionService struct {
 	shamirClient shamir.IShamirCoordinatorClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
-	logger       AppLogger
+	logger       log.AppLogger
 }
 
 func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
@@ -38,7 +39,7 @@ func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient,
 		r2pClient:    r2pClient,
 		shamirClient: shamirClient,
 		db:           db,
-		logger:       getLogger(cfg.LogLevel),
+		logger:       log.GetLogger(cfg.LogLevel),
 	}
 }
 

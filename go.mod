@@ -119,6 +119,7 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rddl-network/bc-slip39-go v0.1.3 // indirect
+	github.com/rddl-network/go-logger v0.0.2 // indirect
 	github.com/rddl-network/shamir-shareholder-service v0.1.2 // indirect
 	github.com/rddl-network/shamir-shareholder-service/client v0.0.2 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
