@@ -23,6 +23,7 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.Wallet = v.GetString("wallet")
 		cfg.PlanetmintRPCHost = v.GetString("planetmint-rpc-host")
 		cfg.R2PHost = v.GetString("r2p-host")
+		cfg.CertsPath = v.GetString("certs-path")
 		cfg.Cron = v.GetString("cron")
 		cfg.RPCHost = v.GetString("rpc-host")
 		cfg.RPCUser = v.GetString("rpc-user")
