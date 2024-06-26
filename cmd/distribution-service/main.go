@@ -7,6 +7,7 @@ import (
 
 	"github.com/rddl-network/distribution-service/config"
 	"github.com/rddl-network/distribution-service/service"
+	"github.com/rddl-network/go-utils/tls"
 	r2p "github.com/rddl-network/rddl-2-plmnt-service/client"
 	shamir "github.com/rddl-network/shamir-coordinator-service/client"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -27,7 +28,11 @@ func main() {
 	pmClient := service.NewPlanetmintClient(config.PlanetmintRPCHost)
 	eClient := service.NewElementsClient()
 	r2pClient := r2p.NewR2PClient(config.R2PHost, &http.Client{})
-	shamirClient := shamir.NewShamirCoordinatorClient(config.ShamirHost, &http.Client{})
+	mTLSClient, err := tls.Get2WayTLSClient(config.CertsPath)
+	if err != nil {
+		defer log.Fatalf("fatal error setting up mutual TLS client")
+	}
+	shamirClient := shamir.NewShamirCoordinatorClient(config.ShamirHost, mTLSClient)
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
 
 	// If flag distribute=true run service.Distribute function once and exit

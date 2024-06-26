@@ -44,6 +44,7 @@ go run cmd/rddl-claim-service/main.go --distribute=true
 The service needs to be configured via the ```./app.toml``` file or environment variables. The defaults are
 ```
 asset = '7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9' //  liquid asset
+certs-path = './certs/' // to tls authenticate against shamir coordinator
 confirmations = 10 // min number of confirmations on liquid
 cron = '* * * * * *' // cron expression for periodic exectution
 fund-address = '' // liquid address that receives funds to distribute
@@ -52,7 +53,7 @@ r2p-host = 'https://testnet-r2p.rddl.io' // r2p host
 rpc-host = 'localhost:18884' // elements rpc host
 rpc-pass = 'password' // elements rpc password
 rpc-user = 'user' // elements rpc user
-shamir-host = 'http://localhost:9091' // shamir coordinator
+shamir-host = 'https://localhost:9091' // shamir coordinator
 wallet = 'dao' // read only liquid wallet
 ```
 
