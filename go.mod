@@ -8,6 +8,7 @@ require (
 	github.com/planetmint/planetmint-go v0.8.4
 	github.com/rddl-network/elements-rpc v1.0.0
 	github.com/rddl-network/go-logger v0.0.2
+	github.com/rddl-network/go-utils v0.2.0
 	github.com/rddl-network/rddl-2-plmnt-service v0.3.0
 	github.com/rddl-network/rddl-2-plmnt-service/client v0.0.1
 	github.com/rddl-network/shamir-coordinator-service v0.3.1

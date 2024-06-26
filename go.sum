@@ -454,6 +454,8 @@ github.com/rddl-network/elements-rpc v1.0.0 h1:geFcsaD1t2ONxRC13semPpiOwsJl0ZCfk
 github.com/rddl-network/elements-rpc v1.0.0/go.mod h1:E35cJMXZqe1iEo/AvjwSWn25mHZ4+y4gV8qj0lWle5c=
 github.com/rddl-network/go-logger v0.0.2 h1:Tlmatv6uROq3ZQrojU3ucJ2GeIViGIQQ2OFFLCQMXNA=
 github.com/rddl-network/go-logger v0.0.2/go.mod h1:HIWf1yOLW6nyXBxFiuVqc+YegNI9/j9RZ4u4SPWhuJ8=
+github.com/rddl-network/go-utils v0.2.0 h1:KKGfBf3I6EjODspkOijSSJu6Ow4OMspd/gl3yhUaskg=
+github.com/rddl-network/go-utils v0.2.0/go.mod h1:xKO/ZSAEHwcYe8bNUZjcQCIX+6OMXzEXu1WQ1HqXqZA=
 github.com/rddl-network/rddl-2-plmnt-service v0.3.0 h1:WgDOliRI7LNCSeE50HHtUfSYng1BhnTI41+lOOAbl/U=
 github.com/rddl-network/rddl-2-plmnt-service v0.3.0/go.mod h1:3nDis1RV55iYsrctd2lZiNf9Cppqu8ceKjEOp2wHyQ8=
 github.com/rddl-network/rddl-2-plmnt-service/client v0.0.1 h1:JCDFtKBfyg7t7hd/uu6u15NtU1vujVZXecVD0CLO/Xo=
