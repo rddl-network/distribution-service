@@ -70,6 +70,11 @@ func (ds *DistributionService) Distribute() {
 		return
 	}
 
+	if distributionAmt == 0 {
+		ds.logger.Error("msg", "No tokens to distribute.")
+		return
+	}
+
 	liquidAddresses, err := ds.getBeneficiaries()
 	if err != nil {
 		ds.logger.Error("msg", "Error while fetching beneficiary addresses: "+err.Error())
