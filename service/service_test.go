@@ -59,6 +59,22 @@ func TestService(t *testing.T) {
 	app.Distribute()
 }
 
+func TestServiceZeroDistribution(t *testing.T) {
+	app, db, mocks := setupService(t)
+	defer db.Close()
+
+	mocks.eClientMock.EXPECT().ListReceivedByAddress(gomock.Any(), gomock.Any()).Times(1).Return(testutil.TxZeroDetails, nil)
+	// the other mocks are not called : sanity check
+	mocks.pmClientMock.EXPECT().GetValidatorAddresses().Times(0)
+	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper1").Times(0)
+	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(0)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val1").Times(0)
+	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val2").Times(0)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000").Times(0)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000").Times(0)
+	app.Distribute()
+}
+
 // Using uint64 with at least 8 zeros appended indicating the shift from float string to uint representation
 func TestCalculateDistributionAmount(t *testing.T) {
 	amt := service.CalculateDistributionAmount(100000000, 1000000000)
