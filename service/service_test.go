@@ -10,15 +10,15 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
 
-	r2p "github.com/rddl-network/rddl-2-plmnt-service/service"
-	shamir "github.com/rddl-network/shamir-coordinator-service/service"
+	r2p "github.com/rddl-network/rddl-2-plmnt-service/types"
+	shamir "github.com/rddl-network/shamir-coordinator-service/types"
 )
 
 type Mocks struct {
 	eClientMock      *testutil.MockIElementsClient
 	pmClientMock     *testutil.MockIPlanetmintClient
 	r2pClientMock    *testutil.MockIR2PClient
-	shamirClientMock *testutil.MockIShamirCoordinatorClient
+	shamirClientMock *testutil.MockISCClient
 }
 
 func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.DB, mocks Mocks) {
@@ -31,7 +31,7 @@ func setupService(t *testing.T) (app *service.DistributionService, db *leveldb.D
 	eClientMock := testutil.NewMockIElementsClient(ctrl)
 	pmClientMock := testutil.NewMockIPlanetmintClient(ctrl)
 	r2pClientMock := testutil.NewMockIR2PClient(ctrl)
-	shamirClientMock := testutil.NewMockIShamirCoordinatorClient(ctrl)
+	shamirClientMock := testutil.NewMockISCClient(ctrl)
 
 	app = service.NewDistributionService(pmClientMock, eClientMock, r2pClientMock, shamirClientMock, db)
 
@@ -53,8 +53,8 @@ func TestService(t *testing.T) {
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(1).Return([]string{"val2"}, nil)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val1").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid1"}, nil)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val2").Times(1).Return(r2p.ReceiveAddressResponse{LiquidAddress: "liquid2"}, nil)
-	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000").Times(1).Return(shamir.SendTokensResponse{}, nil)
-	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000").Times(1).Return(shamir.SendTokensResponse{}, nil)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000", gomock.Any()).Times(1).Return(shamir.SendTokensResponse{}, nil)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000", gomock.Any()).Times(1).Return(shamir.SendTokensResponse{}, nil)
 
 	app.Distribute()
 }
@@ -70,8 +70,8 @@ func TestServiceZeroDistribution(t *testing.T) {
 	mocks.pmClientMock.EXPECT().GetValidatorDelegationAddresses("valoper2").Times(0)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val1").Times(0)
 	mocks.r2pClientMock.EXPECT().GetReceiveAddress(gomock.Any(), "val2").Times(0)
-	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000").Times(0)
-	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000").Times(0)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid1", "5.00000000", gomock.Any()).Times(0)
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "liquid2", "5.00000000", gomock.Any()).Times(0)
 	app.Distribute()
 }
 

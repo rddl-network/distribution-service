@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	service "github.com/rddl-network/rddl-2-plmnt-service/service"
+	"github.com/rddl-network/rddl-2-plmnt-service/types"
 )
 
 // MockIR2PClient is a mock of IR2PClient interface.
@@ -36,10 +36,10 @@ func (m *MockIR2PClient) EXPECT() *MockIR2PClientMockRecorder {
 }
 
 // GetReceiveAddress mocks base method.
-func (m *MockIR2PClient) GetReceiveAddress(ctx context.Context, plmntAddress string) (service.ReceiveAddressResponse, error) {
+func (m *MockIR2PClient) GetReceiveAddress(ctx context.Context, plmntAddress string) (types.ReceiveAddressResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetReceiveAddress", ctx, plmntAddress)
-	ret0, _ := ret[0].(service.ReceiveAddressResponse)
+	ret0, _ := ret[0].(types.ReceiveAddressResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

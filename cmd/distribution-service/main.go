@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		defer log.Fatalf("fatal error setting up mutual TLS client")
 	}
-	shamirClient := shamir.NewShamirCoordinatorClient(config.ShamirHost, mTLSClient)
+	shamirClient := shamir.NewSCClient(config.ShamirHost, mTLSClient)
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
 
 	// If flag distribute=true run service.Distribute function once and exit
