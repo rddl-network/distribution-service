@@ -24,13 +24,13 @@ type DistributionService struct {
 	pmClient     IPlanetmintClient
 	eClient      IElementsClient
 	r2pClient    r2p.IR2PClient
-	shamirClient shamir.IShamirCoordinatorClient
+	shamirClient shamir.ISCClient
 	db           *leveldb.DB
 	dbMutex      sync.Mutex
 	logger       log.AppLogger
 }
 
-func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.IShamirCoordinatorClient, db *leveldb.DB) *DistributionService {
+func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.ISCClient, db *leveldb.DB) *DistributionService {
 	cfg := config.GetConfig()
 
 	return &DistributionService{
@@ -64,6 +64,8 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 
 // Distributes 10% of received funds to all validators
 func (ds *DistributionService) Distribute() {
+	cfg := config.GetConfig()
+
 	distributionAmt, err := ds.getDistributionAmount()
 	if err != nil {
 		ds.logger.Error("msg", "Error while calculating distribution amount: "+err.Error())
@@ -86,7 +88,7 @@ func (ds *DistributionService) Distribute() {
 
 	// SendToAddresses
 	ds.logger.Info("msg", "sending tokens", "addresses", strings.Join(liquidAddresses, ","), "amount", distributionAmt, "share", share)
-	err = ds.sendToAddresses(share, liquidAddresses)
+	err = ds.sendToAddresses(share, liquidAddresses, cfg.Asset)
 	if err != nil {
 		ds.logger.Error("msg", "Error while sending to validators: "+err.Error())
 		return
@@ -189,11 +191,11 @@ func (ds *DistributionService) calculateShares(total uint64, numValidators uint6
 	return
 }
 
-func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string) (err error) {
+func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string, asset string) (err error) {
 	amtString := util.UintValueToRDDLTokenString(amount)
 
 	for _, address := range addresses {
-		_, err = ds.shamirClient.SendTokens(context.Background(), address, amtString)
+		_, err = ds.shamirClient.SendTokens(context.Background(), address, amtString, asset)
 		if err != nil {
 			return err
 		}
