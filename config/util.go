@@ -33,6 +33,10 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.FundAddress = v.GetString("fund-address")
 		cfg.Asset = v.GetString("asset")
 		cfg.LogLevel = v.GetString("log-level")
+		cfg.DataPath = v.GetString("data-path")
+		cfg.AdvisoryCron = v.GetString("advisory-cron")
+		cfg.TestnetMode = v.GetBool("testnet-mode")
+		cfg.TestnetAddress = v.GetBool("testnet-address")
 		return
 	}
 	log.Println("no config file found.")

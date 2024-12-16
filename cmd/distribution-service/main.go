@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -35,15 +36,26 @@ func main() {
 	shamirClient := shamir.NewSCClient(config.ShamirHost, mTLSClient)
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
 
-	// If flag distribute=true run service.Distribute function once and exit
-	distribute := flag.Bool("distribute", false, "Run Distribute function once and exit")
+	var distribute string
+	flag.StringVar(&distribute, "distribute", "", "Options: 'advisories' or 'validators'")
 	flag.Parse()
-	if *distribute {
-		service.Distribute()
+	switch distribute {
+	case "advisories":
+		log.Printf("Distributing to advisories")
+		err := service.DistributeToAdvisoriesOnce()
+		if err != nil {
+			log.Printf("Error occurred during advisory distribution: %v", err)
+		}
 		return
-	}
-
-	if err = service.Run(config.Cron); err != nil {
-		log.Panicf("error occurred while spinning up service: %v", err)
+	case "validators":
+		log.Printf("Distributing to validators")
+		service.DistributeToValidators()
+		return
+	default:
+		// No distribution option specified, handle accordingly
+		fmt.Println("No distribution option specified. Proceeding with default behavior.")
+		if err = service.Run(); err != nil {
+			log.Panicf("error occurred while spinning up service: %v", err)
+		}
 	}
 }

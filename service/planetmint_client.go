@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"google.golang.org/grpc"
@@ -12,6 +13,7 @@ import (
 type IPlanetmintClient interface {
 	GetValidatorAddresses() (addresses []string, err error)
 	GetValidatorDelegationAddresses(validatorAddress string) (addresses []string, err error)
+	GetBlockHeight() (height int64, err error)
 }
 
 type PlanetmintClient struct {
@@ -69,10 +71,34 @@ func (pmc *PlanetmintClient) getStakingQueryClient() (stakingClient stakingTypes
 	return
 }
 
+func (pmc *PlanetmintClient) getBlockQueryClient() (tmClient tmservice.ServiceClient, err error) {
+	grpcConn, err := pmc.getGRPCConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	tmClient = tmservice.NewServiceClient(grpcConn)
+	return
+}
+
 func (pmc *PlanetmintClient) getGRPCConnection() (grpcConn *grpc.ClientConn, err error) {
 	return grpc.Dial(
 		pmc.host,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(codec.NewProtoCodec(nil).GRPCCodec())),
 	)
+}
+
+func (pmc *PlanetmintClient) GetBlockHeight() (height int64, err error) {
+	client, err := pmc.getBlockQueryClient()
+	if err != nil {
+		return
+	}
+	resp, err := client.GetLatestBlock(context.Background(), &tmservice.GetLatestBlockRequest{})
+	if err != nil {
+		return 0, err
+	}
+
+	// Return the block height
+	return resp.SdkBlock.Header.Height, nil
 }
