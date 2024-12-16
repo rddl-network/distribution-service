@@ -25,8 +25,8 @@ data-path="{{ .DataPath }}"
 advisory-cron="{{ .AdvisoryCron }}"
 testnet-mode="{{ .TestnetMode }}"
 testnet-address="{{ .TestnetAddress }}"
-plmnt_blocks_per_day="{{.PlmntBlocksPerDay}}"
-plmnt_distribution_offset="{{.PlmntDistributionOffset}}"
+planetmint_blocks_per_day="{{.PlmntBlocksPerDay}}"
+planetmint_distribution_offset="{{.PlmntDistributionOffset}}"
 distribution_settlement_offset="{{.DistributionSettlementOffset}}"
 `
 
@@ -48,8 +48,8 @@ type Config struct {
 	AdvisoryCron                 string `mapstructure:"advisory-cron"`
 	TestnetMode                  bool   `mapstructure:"testnet-mode"`
 	TestnetAddress               string `mapstructure:"testnet-address"`
-	PlmntBlocksPerDay            int64  `mapstructure:"plmnt_blocks_per_day"`
-	PlmntDistributionOffset      int64  `mapstructure:"plmnt_distribution_offset"`
+	PlanetmintBlocksPerDay       int64  `mapstructure:"planetmint_blocks_per_day"`
+	PlanetmintDistributionOffset int64  `mapstructure:"planetmint_distribution_offset"`
 	DistributionSettlementOffset int64  `mapstructure:"distribution_settlement_offset"`
 }
 
@@ -78,8 +78,8 @@ func DefaultConfig() *Config {
 		AdvisoryCron:                 "* * * * * *",
 		TestnetMode:                  false,
 		TestnetAddress:               "",
-		PlmntBlocksPerDay:            3600,
-		PlmntDistributionOffset:      75,
+		PlanetmintBlocksPerDay:       3600,
+		PlanetmintDistributionOffset: 75,
 		DistributionSettlementOffset: 5,
 	}
 }

@@ -62,9 +62,9 @@ func (ds *DistributionService) DistributeToAdvisoriesOnce() (err error) {
 
 func (ds *DistributionService) RunDistribution(currentBlockHeight int64, lastWrittenBlockHeight int64) (run bool) {
 	cfg := config.GetConfig()
-	blocksPerWeek := cfg.PlmntBlocksPerDay * 7
+	blocksPerWeek := cfg.PlanetmintBlocksPerDay * 7
 
-	barrierToPass := lastWrittenBlockHeight + blocksPerWeek + cfg.PlmntDistributionOffset + cfg.DistributionSettlementOffset
+	barrierToPass := lastWrittenBlockHeight + blocksPerWeek + cfg.PlanetmintDistributionOffset + cfg.DistributionSettlementOffset
 
 	if currentBlockHeight >= barrierToPass {
 		run = true
