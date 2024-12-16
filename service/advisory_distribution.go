@@ -4,9 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/rddl-network/distribution-service/config"
+)
+
+const (
+	lastBlockHeightFileName = "lastBlockHeight.dat"
 )
 
 func (ds *DistributionService) DistributeToAdvisories() {
@@ -73,7 +76,8 @@ func (ds *DistributionService) RunDistribution(currentBlockHeight int64, lastWri
 }
 
 func (ds *DistributionService) ReadLastBlockHeight() (blockHeight int64, err error) {
-	filePath := filepath.Join(".", "data", "lastBlockHeight.dat")
+	cfg := config.GetConfig()
+	filePath := cfg.DataPath + lastBlockHeightFileName
 
 	// Open the file
 	file, err := os.Open(filePath)
@@ -94,14 +98,14 @@ func (ds *DistributionService) ReadLastBlockHeight() (blockHeight int64, err err
 }
 
 func (ds *DistributionService) WriteLastBlockHeight(blockHeight int64) error {
-	dataDir := filepath.Join(".", "data")
-	err := os.MkdirAll(dataDir, 0755)
+	cfg := config.GetConfig()
+	err := os.MkdirAll(cfg.DataPath, 0755)
 	if err != nil {
 		return fmt.Errorf("error creating data directory: %w", err)
 	}
 
 	// Construct the full path to the file
-	filePath := filepath.Join(dataDir, "lastBlockHeight.dat")
+	filePath := cfg.DataPath + lastBlockHeightFileName
 
 	// Open the file with write-only and create/truncate flags
 	file, err := os.Create(filePath)
