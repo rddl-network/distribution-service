@@ -36,7 +36,7 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.DataPath = v.GetString("data-path")
 		cfg.AdvisoryCron = v.GetString("advisory-cron")
 		cfg.TestnetMode = v.GetBool("testnet-mode")
-		cfg.TestnetAddress = v.GetBool("testnet-address")
+		cfg.TestnetAddress = v.GetString("testnet-address")
 		return
 	}
 	log.Println("no config file found.")
