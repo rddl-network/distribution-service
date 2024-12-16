@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/rddl-network/distribution-service/config"
 	"github.com/rddl-network/distribution-service/service"
@@ -18,6 +19,18 @@ func main() {
 	config, err := config.LoadConfig("./")
 	if err != nil {
 		log.Fatalf("fatal error loading config file: %s", err)
+	}
+
+	var help bool
+	var distribute string
+	flag.BoolVar(&help, "help", false, "Zeigt die verfügbaren Optionen an")
+	flag.StringVar(&distribute, "distribute", "", "Options: 'advisories' oder 'validators'")
+	flag.Parse()
+
+	if help {
+		fmt.Println("Usage:")
+		flag.PrintDefaults()
+		os.Exit(0)
 	}
 
 	db, err := leveldb.OpenFile("./data", nil)
@@ -36,9 +49,6 @@ func main() {
 	shamirClient := shamir.NewSCClient(config.ShamirHost, mTLSClient)
 	service := service.NewDistributionService(pmClient, eClient, r2pClient, shamirClient, db)
 
-	var distribute string
-	flag.StringVar(&distribute, "distribute", "", "Options: 'advisories' or 'validators'")
-	flag.Parse()
 	switch distribute {
 	case "advisories":
 		log.Printf("Distributing to advisories")
