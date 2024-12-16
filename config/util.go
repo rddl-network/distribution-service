@@ -37,6 +37,9 @@ func LoadConfig(path string) (cfg *Config, err error) {
 		cfg.AdvisoryCron = v.GetString("advisory-cron")
 		cfg.TestnetMode = v.GetBool("testnet-mode")
 		cfg.TestnetAddress = v.GetString("testnet-address")
+		cfg.PlmntBlocksPerDay = v.GetInt64("plmnt_blocks_per_day")
+		cfg.PlmntDistributionOffset = v.GetInt64("plmnt_distribution_offset")
+		cfg.DistributionSettlementOffset = v.GetInt64("distribution_settlement_offset")
 		return
 	}
 	log.Println("no config file found.")
