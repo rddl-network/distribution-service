@@ -25,8 +25,8 @@ data-path="{{ .DataPath }}"
 advisory-cron="{{ .AdvisoryCron }}"
 testnet-mode="{{ .TestnetMode }}"
 testnet-address="{{ .TestnetAddress }}"
-planetmint_blocks_per_day={{.PlmntBlocksPerDay}}
-planetmint_distribution_offset={{.PlmntDistributionOffset}}
+planetmint_blocks_per_day={{.PlanetmintBlocksPerDay}}
+planetmint_distribution_offset={{.PlanetmintDistributionOffset}}
 distribution_settlement_offset={{.DistributionSettlementOffset}}
 `
 
