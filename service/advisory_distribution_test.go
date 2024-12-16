@@ -13,9 +13,23 @@ func TestAdvisoryDistribution(t *testing.T) {
 	app, db, mocks := setupService(t)
 	defer db.Close()
 
+	var testValue int64 = 50000
+	err := app.WriteLastBlockHeight(testValue)
+	assert.NoError(t, err)
+
+	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "VJLHinV6iAVSw7Mwx1yRe3jLT86pbjoygJRPNroXhcKxAmtX2EZZM4wAhW993umuquWG7wujcPXw98f9", "9615.38461540", gomock.Any()).Times(1).Return(shamir.SendTokensResponse{}, nil)
+	mocks.pmClientMock.EXPECT().GetBlockHeight().Times(1).Return(int64(100000), nil)
+	app.DistributeToAdvisories()
+}
+
+func TestAdvisoryDistributionOnce(t *testing.T) {
+	app, db, mocks := setupService(t)
+	defer db.Close()
+
 	mocks.shamirClientMock.EXPECT().SendTokens(gomock.Any(), "VJLHinV6iAVSw7Mwx1yRe3jLT86pbjoygJRPNroXhcKxAmtX2EZZM4wAhW993umuquWG7wujcPXw98f9", "9615.38461540", gomock.Any()).Times(1).Return(shamir.SendTokensResponse{}, nil)
 
-	app.DistributeToAdvisories()
+	err := app.DistributeToAdvisoriesOnce()
+	assert.NoError(t, err)
 }
 
 func TestReadWriteLastBlockHeight(t *testing.T) {
