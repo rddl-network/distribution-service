@@ -33,6 +33,21 @@ func (m *MockIPlanetmintClient) EXPECT() *MockIPlanetmintClientMockRecorder {
 	return m.recorder
 }
 
+// GetBlockHeight mocks base method.
+func (m *MockIPlanetmintClient) GetBlockHeight() (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBlockHeight")
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBlockHeight indicates an expected call of GetBlockHeight.
+func (mr *MockIPlanetmintClientMockRecorder) GetBlockHeight() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockHeight", reflect.TypeOf((*MockIPlanetmintClient)(nil).GetBlockHeight))
+}
+
 // GetValidatorAddresses mocks base method.
 func (m *MockIPlanetmintClient) GetValidatorAddresses() ([]string, error) {
 	m.ctrl.T.Helper()

@@ -2,10 +2,7 @@ package service
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"sync"
-	"time"
 
 	"github.com/planetmint/planetmint-go/util"
 	"github.com/rddl-network/distribution-service/config"
@@ -32,8 +29,7 @@ type DistributionService struct {
 
 func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient, r2pClient r2p.IR2PClient, shamirClient shamir.ISCClient, db *leveldb.DB) *DistributionService {
 	cfg := config.GetConfig()
-
-	return &DistributionService{
+	service := &DistributionService{
 		pmClient:     pmClient,
 		eClient:      eClient,
 		r2pClient:    r2pClient,
@@ -41,16 +37,29 @@ func NewDistributionService(pmClient IPlanetmintClient, eClient IElementsClient,
 		db:           db,
 		logger:       log.GetLogger(cfg.LogLevel),
 	}
+	_, err := service.ReadLastBlockHeight()
+	if err != nil {
+		err = service.WriteLastBlockHeight(0)
+		if err != nil {
+			service.logger.Error("error", "Cannot write Block height into file.")
+		}
+	}
+	return service
 }
 
 // Run starts cronjob like thread to periodically check for DAO rewards to distribute to validators
-func (ds *DistributionService) Run(cronExp string) (err error) {
+func (ds *DistributionService) Run() (err error) {
+	cfg := config.GetConfig()
 	wg.Add(1)
 
 	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.DowOptional | cron.Descriptor)
 
 	c := cron.New(cron.WithParser(parser), cron.WithChain())
-	_, err = c.AddFunc(cronExp, ds.Distribute)
+	_, err = c.AddFunc(cfg.Cron, ds.DistributeToValidators)
+	if err != nil {
+		return
+	}
+	_, err = c.AddFunc(cfg.AdvisoryCron, ds.DistributeToAdvisories)
 	if err != nil {
 		return
 	}
@@ -62,152 +71,35 @@ func (ds *DistributionService) Run(cronExp string) (err error) {
 	return
 }
 
-// Distributes 10% of received funds to all validators
-func (ds *DistributionService) Distribute() {
-	cfg := config.GetConfig()
-
-	distributionAmt, err := ds.getDistributionAmount()
-	if err != nil {
-		ds.logger.Error("msg", "Error while calculating distribution amount: "+err.Error())
-		return
-	}
-
-	if distributionAmt == 0 {
-		ds.logger.Error("msg", "No tokens to distribute.")
-		return
-	}
-
-	liquidAddresses, err := ds.getBeneficiaries()
-	if err != nil {
-		ds.logger.Error("msg", "Error while fetching beneficiary addresses: "+err.Error())
-		return
-	}
-
-	// CalculateShares
-	share, _ := ds.calculateShares(distributionAmt, uint64(len(liquidAddresses)))
-
-	// SendToAddresses
-	ds.logger.Info("msg", "sending tokens", "addresses", strings.Join(liquidAddresses, ","), "amount", distributionAmt, "share", share)
-	err = ds.sendToAddresses(share, liquidAddresses, cfg.Asset)
-	if err != nil {
-		ds.logger.Error("msg", "Error while sending to validators: "+err.Error())
-		return
-	}
-}
-
-func (ds *DistributionService) getDistributionAmount() (distributionAmt uint64, err error) {
-	received, err := ds.checkReceivedBalance()
-	if err != nil {
-		return
-	}
-
-	ds.logger.Debug("msg", "Reading last occurrence")
-	occurrence, err := ds.GetLastOccurrence()
-	if err != nil {
-		return
-	}
-
-	ds.logger.Debug("msg", "Storing current occurrence")
-	err = ds.StoreOccurrence(time.Now().Unix(), received)
-	if err != nil {
-		return
-	}
-
-	if occurrence == nil {
-		return CalculateDistributionAmount(0, received), nil
-	}
-
-	return CalculateDistributionAmount(occurrence.Amount, received), nil
-}
-
-// Checks for received asset on a given address
-func (ds *DistributionService) checkReceivedBalance() (received uint64, err error) {
-	cfg := config.GetConfig()
-	ds.logger.Info("msg", "checking received balance", "address", cfg.FundAddress, " asset", cfg.Asset)
-
-	confirmationString := strconv.Itoa(cfg.Confirmations)
-	txDetails, err := ds.eClient.ListReceivedByAddress(cfg.GetElementsURL(),
-		[]string{confirmationString, "false", "true", `"` + cfg.FundAddress + `"`, `"` + cfg.Asset + `"`},
-	)
-	if err != nil {
-		return 0, err
-	}
-
-	for _, txDetail := range txDetails {
-		received += util.RDDLToken2Uint(txDetail.Amount)
-	}
-
-	return
-}
-
-func (ds *DistributionService) getBeneficiaries() (addresses []string, err error) {
-	plmntAddresses, err := ds.getActiveValidatorAddresses()
-	if err != nil {
-		return nil, err
-	}
-
-	ds.logger.Info("msg", "fetching liquid receive addresses", "planetmintAddresses", strings.Join(plmntAddresses, ","))
-	return ds.getReceiveAddresses(plmntAddresses)
-}
-
-// getReceiveAddresses fetches receive addresses from the rddl-2-plmnt service
-func (ds *DistributionService) getReceiveAddresses(addresses []string) (receiveAddresses []string, err error) {
-	for _, address := range addresses {
-		receiveAddress, err := ds.r2pClient.GetReceiveAddress(context.Background(), address)
-		if err != nil {
-			return nil, err
-		}
-		receiveAddresses = append(receiveAddresses, receiveAddress.LiquidAddress)
-	}
-	return
-}
-
-// Gets all active validator addresses
-func (ds *DistributionService) getActiveValidatorAddresses() (addresses []string, err error) {
-	valAddresses, err := ds.pmClient.GetValidatorAddresses()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, address := range valAddresses {
-		delegationAddresses, err := ds.pmClient.GetValidatorDelegationAddresses(address)
-		if err != nil {
-			return nil, err
-		}
-		addresses = append(addresses, delegationAddresses...)
-	}
-
-	return
-}
-
-// Calculates share per given address
-func (ds *DistributionService) calculateShares(total uint64, numValidators uint64) (share uint64, remainder uint64) {
-	if numValidators == 0 {
-		return 0, total
-	}
-
-	share = total / numValidators
-	remainder = total % numValidators
-	return
-}
-
-func (ds *DistributionService) sendToAddresses(amount uint64, addresses []string, asset string) (err error) {
+func (ds *DistributionService) sendToAddresses(addresses []string, amount uint64, asset string) (err error) {
 	amtString := util.UintValueToRDDLTokenString(amount)
 
 	for _, address := range addresses {
-		_, err = ds.shamirClient.SendTokens(context.Background(), address, amtString, asset)
+		err = ds.sendAmountStringToAddress(address, amtString, asset)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
 	return
 }
 
-func CalculateDistributionAmount(prev uint64, curr uint64) (distributionAmt uint64) {
-	if prev == 0 {
-		return curr / 100 * 10
+func (ds *DistributionService) sendToAddress(address string, amount float64, asset string) (err error) {
+	amountUint := util.RDDLToken2Uint(amount)
+	amtString := util.UintValueToRDDLTokenString(amountUint)
+	err = ds.sendAmountStringToAddress(address, amtString, asset)
+	if err != nil {
+		return
 	}
 
-	return (curr - prev) / 100 * 10
+	return
+}
+
+func (ds *DistributionService) sendAmountStringToAddress(address string, amount string, asset string) (err error) {
+	_, err = ds.shamirClient.SendTokens(context.Background(), address, amount, asset)
+	if err != nil {
+		return
+	}
+
+	return
 }

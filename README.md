@@ -35,10 +35,16 @@ The service can be executed via the following go command without having it previ
 go run cmd/rddl-claim-service/main.go
 ```
 
-The distribution funcionality can also be triggered manually by passing the distribute flag:
+The distribution functionality can also be triggered manually by passing the distribute flag:
 ```
-go run cmd/rddl-claim-service/main.go --distribute=true
+go run cmd/rddl-claim-service/main.go --distribute=advisories
 ```
+or
+```
+go run cmd/rddl-claim-service/main.go --distribute=validators
+```
+
+
 
 ## Configuration
 The service needs to be configured via the ```./app.toml``` file or environment variables. The defaults are
