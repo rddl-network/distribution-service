@@ -23,7 +23,7 @@ func main() {
 
 	var help bool
 	var distribute string
-	flag.BoolVar(&help, "help", false, "Zeigt die verfügbaren Optionen an")
+	flag.BoolVar(&help, "help", false, "Lists command line options")
 	flag.StringVar(&distribute, "distribute", "", "Options: 'advisories' oder 'validators'")
 	flag.Parse()
 
