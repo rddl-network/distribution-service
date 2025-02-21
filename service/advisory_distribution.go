@@ -32,9 +32,9 @@ func (ds *DistributionService) DistributeToAdvisories() {
 	}
 
 	err = ds.DistributeToAdvisoriesOnce()
-	if err != nil {
-		return
-	}
+	// the error is reported but we have to write down the last block.
+	// the coordinator service takes care about non settled transactions.
+	// if we do not write down the last block the coordinator service will be flooded with tx requests.
 
 	err = ds.WriteLastBlockHeight(currentBlockHeight)
 	if err != nil {
