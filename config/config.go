@@ -28,6 +28,7 @@ testnet-address="{{ .TestnetAddress }}"
 planetmint_blocks_per_day={{.PlanetmintBlocksPerDay}}
 planetmint_distribution_offset={{.PlanetmintDistributionOffset}}
 distribution_settlement_offset={{.DistributionSettlementOffset}}
+disable-advisory-distribution={{.DisableAdvisoryDistribution}}
 `
 
 type Config struct {
@@ -51,6 +52,7 @@ type Config struct {
 	PlanetmintBlocksPerDay       int64  `mapstructure:"planetmint_blocks_per_day"`
 	PlanetmintDistributionOffset int64  `mapstructure:"planetmint_distribution_offset"`
 	DistributionSettlementOffset int64  `mapstructure:"distribution_settlement_offset"`
+	DisableAdvisoryDistribution  bool   `mapstructure:"disable-advisory-distribution"`
 }
 
 var (
@@ -81,6 +83,7 @@ func DefaultConfig() *Config {
 		PlanetmintBlocksPerDay:       3600,
 		PlanetmintDistributionOffset: 75,
 		DistributionSettlementOffset: 5,
+		DisableAdvisoryDistribution:  true,
 	}
 }
 

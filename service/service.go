@@ -59,9 +59,11 @@ func (ds *DistributionService) Run() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = c.AddFunc(cfg.AdvisoryCron, ds.DistributeToAdvisories)
-	if err != nil {
-		return
+	if !cfg.DisableAdvisoryDistribution {
+		_, err = c.AddFunc(cfg.AdvisoryCron, ds.DistributeToAdvisories)
+		if err != nil {
+			return
+		}
 	}
 	c.Start()
 
