@@ -50,9 +50,11 @@ go run cmd/rddl-claim-service/main.go --distribute=validators
 The service needs to be configured via the ```./app.toml``` file or environment variables. The defaults are
 ```
 asset = '7add40beb27df701e02ee85089c5bc0021bc813823fedb5f1dcb5debda7f3da9' //  liquid asset
+advisory-cron = '* * * * * *' // cron expression for advisory distribution
 certs-path = './certs/' // to tls authenticate against shamir coordinator
 confirmations = 10 // min number of confirmations on liquid
 cron = '* * * * * *' // cron expression for periodic exectution
+disable-advisory-distribution = true // set to false to disable advisory distribution
 fund-address = '' // liquid address that receives funds to distribute
 planetmint-rpc-host = 'localhost:9090' // plmnt rpc host
 r2p-host = 'https://testnet-r2p.rddl.io' // r2p host
