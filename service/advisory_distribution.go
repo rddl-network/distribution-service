@@ -27,7 +27,7 @@ func (ds *DistributionService) DistributeToAdvisories() {
 
 	runDistribution := ds.RunDistribution(currentBlockHeight, lastWrittenBlockHeight)
 	if !runDistribution {
-		ds.logger.Debug("don't run distribution")
+		ds.logger.Debug("msg", "don't run distribution")
 		return
 	}
 
